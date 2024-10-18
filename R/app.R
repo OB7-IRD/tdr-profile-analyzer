@@ -14,7 +14,7 @@ library(webshot)
 ### 2. UI ----
 
 ui <- dashboardPage(
-  dashboardHeader(title = "COPAL pour NKE TDR WiSens (version 2.0)",
+  dashboardHeader(title = "TDR PROFILE ANALYZER - v0.1",
                   titleWidth = 500),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
@@ -37,8 +37,8 @@ ui <- dashboardPage(
                
                # Numéro de série, dates de marée
                column(4,
-                      textOutput("numerodeserie"),
-                      textOutput("datedebutcalee"))),
+                      textOutput("tdrmodel"),
+                      textOutput("numerodeserie"))),
         
         # Partie de l'UI a afficher uniquement si un fichier
         # d'entrée a bien été sélectionné
@@ -61,13 +61,13 @@ ui <- dashboardPage(
         status = "primary", solidHeader = TRUE,
         
         column(6,
-               h5("Sur le graphique suivant, cliquez pour placer dans l'odre :"),
-               h5("- Le début du déploiement."),
-               h5("- Le début de la pêche."),
-               h5("- La fin de la pêche (début de la remontée ou capture d'un individu)."),
-               h5("- La fin du déploiement (la fin de la remontée)."),
+               h5("Sur le profile suivant, cliquez pour placer dans l'ordre :"),
+               h5("- (A) Le début du déploiement"),
+               h5("- (B) Le début de la pêche"),
+               h5("- (C) La fin de la pêche (début de la remontée ou capture d'un individu)"),
+               h5("- (D) La fin du déploiement (la fin de la remontée)"),
                h5("Veillez à bien cliquer sur les points dans l'ordre demandé."),
-               h5("Les points que vous avez sélectionnés s'affichent en rouge sur le graphique, et leurs coordonnées dans le tableau en-dessous.")),
+               h5("Les points que vous avez sélectionnés s'affichent en rouge sur le graphique, et leurs coordonnées dans le tableau ci-dessous.")),
         
         column(6,
                h5("Si vous vous êtes trompés, cliquez sur le bouton Recommencer."),
@@ -242,29 +242,45 @@ server <- function(input, output, session) {
   stage1 <- function(input){
     # Read csv file
     df0 <- read.csv(input$file1$datapath,
-                    header = T,
-                    sep = ",",
-                    quote = "")
+                    header = T)
+    # df0 <- read.csv("data/5dc6_data_241006_172100.csv", header = T)
+    # Isolate metadata
+    metdata <- df0[substr(df0[,1], 1, 1) == "#", "Timestamp.Standard."] 
     # Remove metadata
-    df1 <- df0[substr(df0[,1], 1, 1) != "#",] 
-    # Add columnn
-    df1$Temper <- round(as.numeric(df1$CH0.Temperature.degC.), digits = 3)
-    df1$Depth <- round(as.numeric(df1$CH1.Depth.dbar.), digits = 3)
-    df1$TimeStamp <- as.POSIXct(df1$Timestamp.Standard., format = "%Y-%m-%d %H:%M:%S")
-    df1$Date <- paste(substr(df1$TimeStamp, 9, 10), substr(df1$TimeStamp, 6, 7), substr(df1$TimeStamp, 1, 4), sep="/")
-    df1$Time <- substr(df1$TimeStamp, 12, 20)
-    # Return df
+    df1 <- df0[substr(df0[,1], 1, 1) != "#",]
+    # As tibble
+    df1 <- as_tibble(df1) %>%
+      mutate(Timestamp.Standard. = as.character(Timestamp.Standard.),
+             CH0.Pressure.bar. = as.numeric(CH0.Pressure.bar.),
+             CH1.Temperature.degC. = as.numeric(CH1.Temperature.degC.),
+             CH2.Depth.m. = as.numeric(CH2.Depth.m.))
+    # Return tibble
     return(df1)
   }
   
   # Fonction stage2
   stage2 <- function(df1){
-    df2 <- df1[,c("Date", "Time", "Depth", "Temper")]
+    # Modify columns
+    df2 <- df1 %>%
+      rename(TimeStamp = Timestamp.Standard.) %>%
+      rename(Pressure = CH0.Pressure.bar.) %>%
+      rename(Temperature = CH1.Temperature.degC.) %>%
+      rename(Depth = CH2.Depth.m.) %>%
+      mutate(TimeStamp = as.POSIXct(TimeStamp, format = "%d/%m/%Y %H:%M")) %>%
+      mutate(Date = as.Date(TimeStamp)) %>%
+      mutate(Time = substr(TimeStamp, 12, 20))
+    # Return tibble
     return(df2)
   }
   
   
   ## c. Outputs ----
+  
+  output$tdrmodel <- renderText({
+    tdrmodel <- "NKE WiSens TD1000"
+    # Remplace tout après le premier "_" par une chaîne vide
+    paste("Modèle du TDR :", tdrmodel)
+  })
   
   output$numerodeserie <- renderText({
     req(input$file1)
@@ -275,26 +291,25 @@ server <- function(input, output, session) {
     paste("Numéro de série :", numerodeserie)
   })
   
-  output$datedebutcalee <- renderText({
-    req(input$file1)
-    file_name <- input$file1$name
-    # Extraire les 6 caractères après "data_"
-    datedebutcalee <- sub(".*data_(.{6}).*", "\\1", file_name)
-    # Capture les 6 caractères après "data_"
-    paste("Début de calée :", datedebutcalee)
-  })
+  # output$datedebutcalee <- renderText({
+  #   req(input$file1)
+  #   file_name <- input$file1$name
+  #   # Extraire les 6 caractères après "data_"
+  #   datedebutcalee <- sub(".*data_(.{6}).*", "\\1", file_name)
+  #   # Capture les 6 caractères après "data_"
+  #   paste("Début de calée :", datedebutcalee)
+  # })
   
   output$contents <- renderTable({
     req(input$file1)
     df1 <- stage1(input)
-    df2 <- stage2(df1)
-    
+
     # On affiche seulement les premieres lignes ou toute la table
     if(input$disp == "head") {
-      return(head(df2, n = 3))
+      return(head(df1, n = 3))
     }
     else {
-      return(df2)
+      return(df1)
     }
   })
   
@@ -303,16 +318,17 @@ server <- function(input, output, session) {
     
     req(input$file1)
     
-    # Run stage1
+    # Run stage1 and stage2
     df1 <- stage1(input)
+    df2 <- stage2(df1)
     
     # Le graphique
-    p <- plot_ly(data = df1, x = ~TimeStamp, y = ~Depth * -1,
+    p <- plot_ly(data = df2, x = ~TimeStamp, y = ~Depth * -1,
                  type = 'scatter', mode = 'lines') %>%
       layout(
         title = list(text = gsub(".csv", "", input$file1$name)),
         xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
-        yaxis = list(title = "Profondeur (m)", range = c(max(df1$Depth) * -1, 0)),
+        yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth) * -1, 0)),
         showlegend = FALSE
       )
     
@@ -332,7 +348,7 @@ server <- function(input, output, session) {
     if (nrow(current_points) > 0 & !is.null(click_data)) {
       p <- p %>%
         add_segments(x = current_points$Time, xend = current_points$Time,
-                     y = max(df1$Depth) * -1, yend = 0,
+                     y = max(df2$Depth) * -1, yend = 0,
                      line = list(color = 'red', width = 2), showlegend = FALSE)
     }
     
@@ -371,11 +387,11 @@ server <- function(input, output, session) {
   # Téléchargement de la figure au format .png
   output$download_plot <- downloadHandler(
     filename = paste0(gsub(".csv", "", input$file1$name),
-                      "_copal2.png"),
+                      "_tdr-profile-analyzer.png"),
     
     content = function(file) {
       # On définit le chemin ou on veut enregistrer le graphique final
-      save_path <- file.path("C:/Users/2024ct004/Dropbox/Git/copal-2.0/output", paste0(gsub(".csv", "", input$file1$name), "_copal2.png"))
+      save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
       
       # On sauvegarde en passant par un fichier HTML temporaire
       temp_html <- tempfile(fileext = ".html")
@@ -383,12 +399,12 @@ server <- function(input, output, session) {
       # Générer le graphique
       req(input$file1)
       df1 <- stage1(input)
-      p <- plot_ly(data = df1, x = ~TimeStamp, y = ~Depth * -1,
+      p <- plot_ly(data = df2, x = ~TimeStamp, y = ~Depth * -1,
                    type = 'scatter', mode = 'lines') %>%
         layout(
           title = list(text = gsub(".csv", "", input$file1$name)),
           xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
-          yaxis = list(title = "Profondeur (m)", range = c(max(df1$Depth) * -1, 0)),
+          yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth) * -1, 0)),
           showlegend = FALSE
         )
       current_points <- selected_points()
@@ -404,7 +420,7 @@ server <- function(input, output, session) {
       if (nrow(current_points) > 0 & !is.null(click_data)) {
         p <- p %>%
           add_segments(x = current_points$Time, xend = current_points$Time,
-                       y = max(df1$Depth) * -1, yend = 0,
+                       y = max(df2$Depth) * -1, yend = 0,
                        line = list(color = 'red', width = 2), showlegend = FALSE)
       }
       
