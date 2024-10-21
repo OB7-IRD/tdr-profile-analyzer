@@ -20,8 +20,8 @@ ui <- dashboardPage(
   dashboardBody(
     fluidRow(
       box(
-        title = "1. Sélection du fichier .csv", 
-        width = 6,
+        title = "1. Sélection du fichier .csv (NKE WiSens TD1000 v2)", 
+        width = 12,
         status = "primary", solidHeader = TRUE,
         
         column(12,
@@ -43,20 +43,11 @@ ui <- dashboardPage(
         # Partie de l'UI a afficher uniquement si un fichier
         # d'entrée a bien été sélectionné
         uiOutput("fichier_entree")
-      ),
-      
-      box(
-        title = "3. Téléchargement", 
-        width = 6,
-        status = "primary", solidHeader = TRUE,
-        
-        downloadButton("download_plot", "Télécharger figure")
-        # downloadButton("downloadData", "Download table")
       )
     ),
     fluidRow(
       box(
-        title = "2. Graphique et tables", 
+        title = "2. Profil TDR et données clés", 
         width = 12,
         status = "primary", solidHeader = TRUE,
         
@@ -78,6 +69,16 @@ ui <- dashboardPage(
         # Partie de l'UI a afficher uniquement si un fichier
         # d'entrée a bien été sélectionné
         uiOutput("graphe_et_tables")
+      )
+    ),
+    fluidRow(
+      box(
+        title = "3. Téléchargements", 
+        width = 12,
+        status = "primary", solidHeader = TRUE,
+        downloadButton("download_plot", "Télécharger figure en .png"),
+        # downloadButton("downloadData", "Download table")
+        uiOutput("telechargements")
       )
     )
   )
@@ -236,9 +237,9 @@ server <- function(input, output, session) {
                                Profondeur = numeric(0)))
   })
   
-  ## b. Fonctions ----
+  ## b. Functions ----
   
-  # Fonction stage1
+  # Function stage1
   stage1 <- function(input){
     # Read csv file
     df0 <- read.csv(input$file1$datapath,
@@ -258,7 +259,7 @@ server <- function(input, output, session) {
     return(df1)
   }
   
-  # Fonction stage2
+  # Function stage2
   stage2 <- function(df1){
     # Modify columns
     df2 <- df1 %>%
@@ -528,7 +529,7 @@ shinyApp(ui, server)
 ### A FAIRE
 
 # Nom de l'app : finalement on ne l'appelle pas Copal
-# TDR analyzer ?
+# TDR analyzer ? ou tdr-profile-analyzer (v)
 
 # Mettre les logos : IRD et Ob7
 # Mettre les mentions de copyright IRD Ob7
