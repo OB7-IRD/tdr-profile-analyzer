@@ -115,11 +115,11 @@ server <- function(input, output, session) {
           if (etape == "A") {
             nom_etape <- "Début du déploiement"
           } else if (etape == "B") {
-            nom_etape <- "Début de la pêche"
+            nom_etape <- "Début de pêche"
           } else if (etape == "C") {
-            nom_etape <- "Fin de la pêche (début de la remontée ou capture d'un individu)"
+            nom_etape <- "Fin de pêche"
           } else if (etape == "D") {
-            nom_etape <- "Fin du déploiement (fin de la remontée)"
+            nom_etape <- "Fin du déploiement"
           }
           # Ajout du point à l'objet new_points
           new_points <- rbind(current_points, data.frame(Etape = etape,
@@ -179,7 +179,8 @@ server <- function(input, output, session) {
       rename(Pressure = CH0.Pressure.bar.) %>%
       rename(Temperature = CH1.Temperature.degC.) %>%
       rename(Depth = CH2.Depth.m.) %>%
-      mutate(TimeStamp = as.POSIXct(TimeStamp, format = "%d/%m/%Y %H:%M")) %>%
+      # mutate(TimeStamp = as.POSIXct(TimeStamp, format = "%d/%m/%Y %H:%M")) %>%
+      mutate(TimeStamp = as.POSIXct(TimeStamp, format = "%Y-%m-%d %H:%M:%S")) %>%
       mutate(Date = as.Date(TimeStamp)) %>%
       mutate(Time = substr(TimeStamp, 12, 20))
     # Return tibble
@@ -277,15 +278,41 @@ server <- function(input, output, session) {
   
   ## Boutons ----
   
-  # # Téléchargement des points sélectionnés sous format .csv
-  # output$downloadData <- downloadHandler(
-  #   filename = function() {
-  #     paste("points_selectionnes_", Sys.Date(), ".csv", sep = "")
-  #   },
-  #   content = function(file) {
-  #     write.csv(selected_points(), file, row.names = FALSE)
-  #   }
-  # )
+  # Téléchargement des données au format .txt
+  output$download_data <- downloadHandler(
+    
+    filename = function() {
+      paste0(gsub(".csv", "", input$file1$name),
+             "_tdr-profile-analyzer.txt")
+    },
+    
+    content = function(file) {
+      # On définit le chemin ou on veut enregistrer le document final
+      save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
+      
+      # Ouvrir le fichier pour écrire
+      con <- file(save_path, open = "wt")
+      
+      # Récupérer les données des tables
+      selected <- selected_points()
+      calculated <- calculated_data()
+      
+      # Récupérer le code FAO du potentiel individu capturé
+      capture_FAO <- input$capture_FAO
+      
+      # Ecrire dans le fichier
+      writeLines("Table : Horodatage\n", con)
+      write.table(selected, con, sep = "\t", row.names = FALSE, col.names = TRUE)
+      writeLines("\n\n", con)
+      writeLines("Table : Données clés\n", con)
+      write.table(calculated, con, sep = "\t", row.names = FALSE, col.names = TRUE)
+      writeLines("\n\n", con)
+      writeLines(paste("Individu capturé :", capture_FAO), con)
+
+      # Fermer la connexion
+      close(con)
+    }
+  )
   
   # Téléchargement de la figure au format .png
   output$download_plot <- downloadHandler(

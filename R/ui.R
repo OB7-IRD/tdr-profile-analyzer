@@ -38,10 +38,10 @@ ui <- dashboardPage(
         
         column(6,
                h5("Sur le profile suivant, cliquez pour placer dans l'ordre :"),
-               h5("- (A) Le début du déploiement"),
-               h5("- (B) Le début de la pêche"),
-               h5("- (C) La fin de la pêche (début de la remontée ou capture d'un individu)"),
-               h5("- (D) La fin du déploiement (la fin de la remontée)"),
+               h5("- (A) Le début du déploiement."),
+               h5("- (B) Le début de pêche."),
+               h5("- (C) La fin de pêche (début de la remontée ou capture d'un individu)."),
+               h5("- (D) La fin du déploiement (la fin de la remontée)."),
                h5("Veillez à bien cliquer sur les points dans l'ordre demandé."),
                h5("Les points que vous avez sélectionnés s'affichent en rouge sur le graphique, et leurs coordonnées dans le tableau ci-dessous.")),
         
@@ -62,8 +62,36 @@ ui <- dashboardPage(
         width = 12,
         status = "primary", solidHeader = TRUE,
         
-        downloadButton("download_plot", "Télécharger figure en .png")
-        # downloadButton("downloadData", "Download table")
+        # h5("S'il y a eu une capture, entrez le code FAO de l'espèce :"),
+        # textInput("capture_FAO",
+        #           label = NULL,
+        #           value = "",
+        #           width = '100px'),
+        # downloadButton("download_plot", "Télécharger figure en .png"),
+        # downloadButton("download_data", "Télécharger données en .txt")
+        
+        fluidRow(
+          column(
+            width = 4,
+            align = "center",
+            h5("S'il y a eu une capture, entrez le code FAO de l'espèce :"),
+            textInput("capture_FAO", label = NULL, value = "", width = '100px')
+          ),
+          
+          column(
+            width = 4,
+            align = "center",
+            br(),
+            downloadButton("download_plot", "Télécharger figure en .png")
+          ),
+          
+          column(
+            width = 4,
+            align = "center",
+            br(),
+            downloadButton("download_data", "Télécharger données en .txt")
+          )
+        )
       )
     )
   )
