@@ -76,9 +76,9 @@ ui <- dashboardPage(
         title = "3. Téléchargements", 
         width = 12,
         status = "primary", solidHeader = TRUE,
-        downloadButton("download_plot", "Télécharger figure en .png"),
+        
+        downloadButton("download_plot", "Télécharger figure en .png")
         # downloadButton("downloadData", "Download table")
-        uiOutput("telechargements")
       )
     )
   )
@@ -88,6 +88,8 @@ ui <- dashboardPage(
 ### 3. Server ----
 
 server <- function(input, output, session) {
+  
+  ## Les parties d'UI cachées ----
   
   # La partie de l'UI graphe et tables, a afficher uniquement
   # si un fichier d'entrée a bien été sélectionné
@@ -137,12 +139,12 @@ server <- function(input, output, session) {
   })
   
   
-  ## a. Objets réactifs ----
+  ## Objets réactifs ----
   
   # Valeur réactive qui stocke les points cliqués sur le graphique
   selected_points <- reactiveVal(data.frame(Etape = character(0),
                                             Nom = character(0),
-                                            Time = numeric(0),
+                                            TimeStamp = character(0),
                                             Depth = numeric(0)))
   
   # Valeur réactive pour le tableau des métriques à calculer
@@ -153,7 +155,7 @@ server <- function(input, output, session) {
   observeEvent(input$file1, {
     selected_points(data.frame(Etape = character(0),
                                Nom = character(0),
-                               Time = numeric(0),
+                               TimeStamp = character(0),
                                Depth = numeric(0)))
     calculated_data(data.frame(Metrique = character(0),
                                Profondeur = numeric(0)))
@@ -171,7 +173,7 @@ server <- function(input, output, session) {
     depth <- click_data$y
     
     # Vérification de si le point cliqué est déjà dans la table
-    point_exists <- any(current_points$Time == time & current_points$Depth == depth)
+    point_exists <- any(current_points$TimeStamp == time & current_points$Depth == depth)
     if (point_exists) {
       
       # Cas 1 : l'utilisateur clique sur un point déjà cliqué, il ne se passe rien
@@ -191,7 +193,7 @@ server <- function(input, output, session) {
       } else {
         # Cas 2.2 : l'utilisateur a sélectionné moins de 4 points
         
-        if (nrow(current_points) == 0 | all(current_points$Time < time)) {
+        if (nrow(current_points) == 0 | all(current_points$TimeStamp < time)) {
           # Cas 2.2.1 : premier point sélectionné,
           # ou bien le point sélectionné est bien APRES le point précédent
           
@@ -211,7 +213,7 @@ server <- function(input, output, session) {
           # Ajout du point à l'objet new_points
           new_points <- rbind(current_points, data.frame(Etape = etape,
                                                          Nom = nom_etape,
-                                                         Time = time,
+                                                         TimeStamp = time,
                                                          Depth = depth))
           # Mettre à jour le réactif avec le nouveau tableau
           selected_points(new_points)
@@ -231,20 +233,19 @@ server <- function(input, output, session) {
   observeEvent(input$clear_points, {
     selected_points(data.frame(Etape = character(0),
                                Nom = character(0),
-                               Time = numeric(0),
+                               TimeStamp = character(0),
                                Depth = numeric(0)))
     calculated_data(data.frame(Metrique = character(0),
                                Profondeur = numeric(0)))
   })
   
-  ## b. Functions ----
+  ## Fonctions ----
   
   # Function stage1
   stage1 <- function(input){
     # Read csv file
     df0 <- read.csv(input$file1$datapath,
                     header = T)
-    # df0 <- read.csv("data/5dc6_data_241006_172100.csv", header = T)
     # Isolate metadata
     metdata <- df0[substr(df0[,1], 1, 1) == "#", "Timestamp.Standard."] 
     # Remove metadata
@@ -275,11 +276,10 @@ server <- function(input, output, session) {
   }
   
   
-  ## c. Outputs ----
+  ## Outputs ----
   
   output$tdrmodel <- renderText({
     tdrmodel <- "NKE WiSens TD1000"
-    # Remplace tout après le premier "_" par une chaîne vide
     paste("Modèle du TDR :", tdrmodel)
   })
   
@@ -292,19 +292,10 @@ server <- function(input, output, session) {
     paste("Numéro de série :", numerodeserie)
   })
   
-  # output$datedebutcalee <- renderText({
-  #   req(input$file1)
-  #   file_name <- input$file1$name
-  #   # Extraire les 6 caractères après "data_"
-  #   datedebutcalee <- sub(".*data_(.{6}).*", "\\1", file_name)
-  #   # Capture les 6 caractères après "data_"
-  #   paste("Début de calée :", datedebutcalee)
-  # })
-  
   output$contents <- renderTable({
     req(input$file1)
     df1 <- stage1(input)
-
+    
     # On affiche seulement les premieres lignes ou toute la table
     if(input$disp == "head") {
       return(head(df1, n = 3))
@@ -329,7 +320,7 @@ server <- function(input, output, session) {
       layout(
         title = list(text = gsub(".csv", "", input$file1$name)),
         xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
-        yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth) * -1, 0)),
+        yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth, na.rm = TRUE) * -1, 0)),
         showlegend = FALSE
       )
     
@@ -337,7 +328,7 @@ server <- function(input, output, session) {
     current_points <- selected_points()
     if (nrow(current_points) > 0) {
       p <- p %>%
-        add_trace(data = current_points, x = ~Time, y = ~Depth,
+        add_trace(data = current_points, x = ~TimeStamp, y = ~Depth,
                   type = 'scatter', mode = 'markers+text',
                   text = ~Etape, textposition = 'top right',
                   textfont = list(color = 'red'),
@@ -348,8 +339,8 @@ server <- function(input, output, session) {
     click_data <- event_data("plotly_click")
     if (nrow(current_points) > 0 & !is.null(click_data)) {
       p <- p %>%
-        add_segments(x = current_points$Time, xend = current_points$Time,
-                     y = max(df2$Depth) * -1, yend = 0,
+        add_segments(x = current_points$TimeStamp, xend = current_points$TimeStamp,
+                     y = max(df2$Depth, na.rm = TRUE) * -1, yend = 0,
                      line = list(color = 'red', width = 2), showlegend = FALSE)
     }
     
@@ -373,17 +364,17 @@ server <- function(input, output, session) {
     calculated_data
   })
   
-  ## d. Boutons ----
+  ## Boutons ----
   
-  # Téléchargement des points sélectionnés sous format .csv
-  output$downloadData <- downloadHandler(
-    filename = function() {
-      paste("points_selectionnes_", Sys.Date(), ".csv", sep = "")
-    },
-    content = function(file) {
-      write.csv(selected_points(), file, row.names = FALSE)
-    }
-  )
+  # # Téléchargement des points sélectionnés sous format .csv
+  # output$downloadData <- downloadHandler(
+  #   filename = function() {
+  #     paste("points_selectionnes_", Sys.Date(), ".csv", sep = "")
+  #   },
+  #   content = function(file) {
+  #     write.csv(selected_points(), file, row.names = FALSE)
+  #   }
+  # )
   
   # Téléchargement de la figure au format .png
   output$download_plot <- downloadHandler(
@@ -400,18 +391,19 @@ server <- function(input, output, session) {
       # Générer le graphique
       req(input$file1)
       df1 <- stage1(input)
+      df2 <- stage2(df1)
       p <- plot_ly(data = df2, x = ~TimeStamp, y = ~Depth * -1,
                    type = 'scatter', mode = 'lines') %>%
         layout(
           title = list(text = gsub(".csv", "", input$file1$name)),
           xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
-          yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth) * -1, 0)),
+          yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth, na.rm = TRUE) * -1, 0)),
           showlegend = FALSE
         )
       current_points <- selected_points()
       if (nrow(current_points) > 0) {
         p <- p %>%
-          add_trace(data = current_points, x = ~Time, y = ~Depth,
+          add_trace(data = current_points, x = ~TimeStamp, y = ~Depth,
                     type = 'scatter', mode = 'markers+text',
                     text = ~Etape, textposition = 'top right',
                     textfont = list(color = 'red'),
@@ -420,8 +412,8 @@ server <- function(input, output, session) {
       click_data <- event_data("plotly_click")
       if (nrow(current_points) > 0 & !is.null(click_data)) {
         p <- p %>%
-          add_segments(x = current_points$Time, xend = current_points$Time,
-                       y = max(df2$Depth) * -1, yend = 0,
+          add_segments(x = current_points$TimeStamp, xend = current_points$TimeStamp,
+                       y = max(df2$Depth, na.rm = TRUE) * -1, yend = 0,
                        line = list(color = 'red', width = 2), showlegend = FALSE)
       }
       
@@ -447,11 +439,12 @@ server <- function(input, output, session) {
       
       # - Profondeur minimale de peche : min entre B et C
       # On extrait les heures des points B et C
-      time_B <- current_points$Time[current_points$Etape == "B"]
-      time_C <- current_points$Time[current_points$Etape == "C"]
-      # On filtre les lignes de df1 entre les heures de B et C
+      time_B <- current_points$TimeStamp[current_points$Etape == "B"]
+      time_C <- current_points$TimeStamp[current_points$Etape == "C"]
+      # On filtre les lignes de df2 entre les heures de B et C
       df1 <- stage1(input)
-      filtered_data_BC <- df1 %>%
+      df2 <- stage2(df1)
+      filtered_data_BC <- df2 %>%
         filter(TimeStamp >= time_B & TimeStamp <= time_C)
       # On calcule le min de Depth pour ces lignes
       # (ce sont des valeurs absolues donc > 0)
@@ -468,10 +461,10 @@ server <- function(input, output, session) {
       
       # - Profondeur moyenne de deploiement : mean entre A et D
       # On extrait les heures des points A et D
-      time_A <- current_points$Time[current_points$Etape == "A"]
-      time_D <- current_points$Time[current_points$Etape == "D"]
-      # On filtre les lignes de df1 entre les heures de A et D
-      filtered_data_AD <- df1 %>%
+      time_A <- current_points$TimeStamp[current_points$Etape == "A"]
+      time_D <- current_points$TimeStamp[current_points$Etape == "D"]
+      # On filtre les lignes de df2 entre les heures de A et D
+      filtered_data_AD <- df2 %>%
         filter(TimeStamp >= time_A & TimeStamp <= time_D)
       # On calcule la mean de Depth pour ces lignes
       deployment_mean_depth <- mean(filtered_data_AD$Depth, na.rm = TRUE)
@@ -528,14 +521,8 @@ shinyApp(ui, server)
 
 ### A FAIRE
 
-# Nom de l'app : finalement on ne l'appelle pas Copal
-# TDR analyzer ? ou tdr-profile-analyzer (v)
-
 # Mettre les logos : IRD et Ob7
 # Mettre les mentions de copyright IRD Ob7
-
-# Fichier d'entrée : utiliser nv format (5e0d_data_241016_113109.csv)
-# Affichage de la table : laisser au format original, tel que le fichier est
 
 # Download figure : me demander le chemin du dossier ou enregistrer
 
@@ -547,9 +534,7 @@ shinyApp(ui, server)
 # .txt qui a toutes ces infos, celles des deux tables, assez lisible
 # Premiere section : Horodatage
 # Deuxieme section : Données clés
-# Nom : le meme que le nom d'entree avec derriere _copal2
-
-# Supprimer l'affichage de la date de debut de calee
+# Nom : le meme que le nom d'entree avec derriere _tdr-profile-analyzer
 
 # Forcer les positions des lettres par rapport aux points
 
