@@ -7,10 +7,6 @@ https://ird-ob7.shinyapps.io/tdr-profile-analyzer/
 
 ## Urgent
 
-Download : demander le chemin du dossier ou enregistrer
-
-Axe des abscisses sur la figure : Date Heure et pas seulement Heure
-
 Mettre les logos : IRD et Ob7, mettre les mentions de copyright IRD Ob7
 
 ## Ensuite

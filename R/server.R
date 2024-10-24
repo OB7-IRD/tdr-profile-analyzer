@@ -263,7 +263,7 @@ server <- function(input, output, session) {
                  type = 'scatter', mode = 'lines') %>%
       layout(
         title = list(text = gsub(".csv", "", input$file1$name)),
-        xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
+        xaxis = list(title = "Jour et heure", tickformat = "%y-%m-%d %H:%M"),
         yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth, na.rm = TRUE) * -1, 0)),
         showlegend = FALSE
       )
@@ -340,11 +340,12 @@ server <- function(input, output, session) {
         return(NULL)
       }
       
-      # On définit le chemin ou on veut enregistrer le document final
-      save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
+      # # On définit le chemin ou on veut enregistrer le document final
+      # save_path <- file.path("..", "output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
       
       # Ouvrir le fichier pour écrire
-      con <- file(save_path, open = "wt")
+      # con <- file(save_path, open = "wt")
+      con <- file(file, open = "wt")
       
       # Récupérer les données des tables
       selected <- selected_points()
@@ -404,12 +405,14 @@ server <- function(input, output, session) {
   
   # Téléchargement de la figure au format .png
   output$download_plot <- downloadHandler(
-    filename = paste0(gsub(".csv", "", input$file1$name),
-                      "_tdr-profile-analyzer.png"),
+    filename = function() {
+      paste0(gsub(".csv", "", input$file1$name),
+             "_tdr-profile-analyzer.png")
+    },
     
     content = function(file) {
-      # On définit le chemin ou on veut enregistrer le graphique final
-      save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
+      # # On définit le chemin ou on veut enregistrer le graphique final
+      # save_path <- file.path("..", "output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
       
       # On sauvegarde en passant par un fichier HTML temporaire
       temp_html <- tempfile(fileext = ".html")
@@ -422,7 +425,7 @@ server <- function(input, output, session) {
                    type = 'scatter', mode = 'lines') %>%
         layout(
           title = list(text = gsub(".csv", "", input$file1$name)),
-          xaxis = list(title = "Heure", tickformat = "%H:%M:%S"),
+          xaxis = list(title = "Jour et heure", tickformat = "%y-%m-%d %H:%M"),
           yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth, na.rm = TRUE) * -1, 0)),
           showlegend = FALSE
         )
@@ -446,7 +449,8 @@ server <- function(input, output, session) {
       # Sauvegarder le graphique dans un fichier HTML temporaire
       htmlwidgets::saveWidget(p, temp_html, selfcontained = TRUE)
       # Utiliser webshot pour créer une image PNG à partir du fichier HTML
-      webshot::webshot(temp_html, file = save_path, vwidth = 1200, vheight = 600)
+      # webshot::webshot(temp_html, file = save_path, vwidth = 1200, vheight = 600)
+      webshot::webshot(temp_html, file, vwidth = 1200, vheight = 600)
     }
   )
   
