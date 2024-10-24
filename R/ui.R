@@ -3,6 +3,7 @@ ui <- dashboardPage(
                   titleWidth = 500),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
+    useShinyjs(),
     fluidRow(
       box(
         title = "1. Sélection du fichier .csv (NKE WiSens TD1000 v2)", 

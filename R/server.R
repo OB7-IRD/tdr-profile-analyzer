@@ -152,26 +152,41 @@ server <- function(input, output, session) {
   
   ## Fonctions ----
   
-  # Function stage1
+  # Function stage1 : chargement du fichier d'entrée
   stage1 <- function(input){
-    # Read csv file
+    # Lire le fichier CSV téléchargé
     df0 <- read.csv(input$file1$datapath,
                     header = T)
-    # Isolate metadata
+    
+    # Isoler les metadata
     metdata <- df0[substr(df0[,1], 1, 1) == "#", "Timestamp.Standard."] 
-    # Remove metadata
+    # Supprimer ces metadata
     df1 <- df0[substr(df0[,1], 1, 1) != "#",]
-    # As tibble
-    df1 <- as_tibble(df1) %>%
-      mutate(Timestamp.Standard. = as.character(Timestamp.Standard.),
-             CH0.Pressure.bar. = as.numeric(CH0.Pressure.bar.),
-             CH1.Temperature.degC. = as.numeric(CH1.Temperature.degC.),
-             CH2.Depth.m. = as.numeric(CH2.Depth.m.))
-    # Return tibble
-    return(df1)
+    
+    # On vérifie les colonnes présentes
+    # Vérifier si une colonne contient le mot "Depth" (insensible à la casse)
+    has_depth_col <- any(grepl("Depth", colnames(df0), ignore.case = TRUE))
+    # Vérifier si une colonne contient le mot "Pressure" (insensible à la casse)
+    has_pressure_col <- any(grepl("Pressure", colnames(df0), ignore.case = TRUE))
+   
+    if (has_pressure_col && has_depth_col) { # Cas 1 : on a Depth en CH2 et Pressure en CH0
+      df1 <- as_tibble(df1) %>%
+        mutate(Timestamp.Standard. = as.character(Timestamp.Standard.),
+               CH0.Pressure.bar. = as.numeric(CH0.Pressure.bar.),
+               CH1.Temperature.degC. = as.numeric(CH1.Temperature.degC.),
+               CH2.Depth.m. = as.numeric(CH2.Depth.m.))
+      return(df1)
+    } else if (has_pressure_col && !has_depth_col) { # Cas 2 : on a Pressure en CH0 mais pas Dep
+      df1 <- as_tibble(df1) %>%
+        mutate(Timestamp.Standard. = as.character(Timestamp.Standard.),
+               CH0.Pressure.bar. = as.numeric(CH0.Pressure.bar.),
+               CH1.Temperature.degC. = as.numeric(CH1.Temperature.degC.))
+      df1$CH2.Depth.m. <- df1$CH0.Pressure.bar. * 10
+      return(df1)
+    }
   }
   
-  # Function stage2
+  # Function stage2 : transformation du fichier d'entrée en un truc un peu + lisible
   stage2 <- function(df1){
     # Modify columns
     df2 <- df1 %>%
@@ -191,6 +206,7 @@ server <- function(input, output, session) {
   ## Outputs ----
   
   output$tdrmodel <- renderText({
+    req(input$file1)
     tdrmodel <- "NKE WiSens TD1000"
     paste("Modèle du TDR :", tdrmodel)
   })
@@ -278,6 +294,22 @@ server <- function(input, output, session) {
   
   ## Boutons ----
   
+  # Activation des boutons de téléchargement sous condition
+  # Au démarrage, les deux boutons de téléchargement sont désactivés
+  shinyjs::disable("download_data")
+  shinyjs::disable("download_plot")
+  
+  # Si fichier d'entrée, on active les deux boutons
+  observe({
+    if (!is.null(input$file1)) {
+      shinyjs::enable("download_data")
+      shinyjs::enable("download_plot")
+    } else {
+      shinyjs::disable("download_data")
+      shinyjs::disable("download_plot")
+    }
+  })
+  
   # Téléchargement des données au format .txt
   output$download_data <- downloadHandler(
     
@@ -287,6 +319,11 @@ server <- function(input, output, session) {
     },
     
     content = function(file) {
+      # Annule le téléchargement si aucun fichier n'est sélectionné
+      if (is.null(input$file1)) {
+        return(NULL)
+      }
+      
       # On définit le chemin ou on veut enregistrer le document final
       save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
       
@@ -297,18 +334,53 @@ server <- function(input, output, session) {
       selected <- selected_points()
       calculated <- calculated_data()
       
+      # On modifie les tables pour avoir un bel alignement sur le fichier .txt de sortie
+      # selected
+      colnames(selected)[2] <- paste0(colnames(selected)[2], ".................")
+      colnames(selected)[3] <- paste0(colnames(selected)[3], ".......")
+      selected[1, 1] <- paste0(selected[1, 1], "....")
+      selected[2, 1] <- paste0(selected[2, 1], "....")
+      selected[2, 2] <- paste0(selected[2, 2], "......")
+      selected[3, 1] <- paste0(selected[3, 1], "....")
+      selected[3, 2] <- paste0(selected[3, 2], "........")
+      selected[4, 1] <- paste0(selected[4, 1], "....")
+      selected[4, 2] <- paste0(selected[4, 2], "..")
+      # calculated
+      colnames(calculated)[1] <- paste0(colnames(calculated)[1], "................................................")
+      calculated[1, 1] <- paste0(calculated[1, 1], "........................")
+      calculated[2, 1] <- paste0(calculated[2, 1], "..........................")
+      calculated[3, 1] <- paste0(calculated[3, 1], ".........")
+      calculated[4, 1] <- paste0(calculated[4, 1], ".........")
+      calculated[5, 1] <- paste0(calculated[5, 1], "......")
+      calculated[6, 1] <- paste0(calculated[6, 1], "......")
+      
+      # On arrondit les valeurs des données clé à 1 décimale
+      calculated[,2] = round(calculated[,2], 1)
+      
       # Récupérer le code FAO du potentiel individu capturé
       capture_FAO <- input$capture_FAO
       
+      # Récupérer le modèle du TDR
+      tdrmodel <- "NKE WiSens TD1000"
+      
+      # Récupérer le numéro de série
+      req(input$file1)
+      file_name <- input$file1$name
+      numerodeserie <- sub("_.*", "", file_name)
+      
       # Ecrire dans le fichier
-      writeLines("Table : Horodatage\n", con)
+      writeLines("Metadata :\n", con)
+      writeLines(paste("Modèle du TDR :", tdrmodel), con)
+      writeLines(paste("Numéro de série :", numerodeserie), con)
+      writeLines("\n\n", con)
+      writeLines("Horodatage :\n", con)
       write.table(selected, con, sep = "\t", row.names = FALSE, col.names = TRUE)
       writeLines("\n\n", con)
-      writeLines("Table : Données clés\n", con)
+      writeLines("Données clés :\n", con)
       write.table(calculated, con, sep = "\t", row.names = FALSE, col.names = TRUE)
       writeLines("\n\n", con)
-      writeLines(paste("Individu capturé :", capture_FAO), con)
-
+      writeLines(paste("Espèce(s) capturée(s) :", capture_FAO), con)
+      
       # Fermer la connexion
       close(con)
     }

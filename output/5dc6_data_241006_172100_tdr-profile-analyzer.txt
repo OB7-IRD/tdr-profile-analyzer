@@ -1,0 +1,32 @@
+Metadata :
+
+Modèle du TDR : NKE WiSens TD1000
+Numéro de série : 5dc6
+
+
+
+Horodatage :
+
+"Etape"	"Nom................."	"TimeStamp......."	"Depth"
+"A...."	"Début du déploiement"	"2024-10-07 01:06:14"	-19.72
+"B...."	"Début de pêche......"	"2024-10-07 02:25:14"	-20.61
+"C...."	"Fin de pêche........"	"2024-10-07 03:55:14"	-20.48
+"D...."	"Fin du déploiement.."	"2024-10-07 04:58:14"	-21.08
+
+
+
+Données clés :
+
+"Metrique................................................"	"Profondeur"
+"Profondeur en début de pêche [B]........................"	20.6
+"Profondeur en fin de pêche [C].........................."	20.5
+"Profondeur minimale de pêche [min entre B et C]........."	19.8
+"Profondeur maximale de pêche [max entre B et C]........."	20.7
+"Profondeur moyenne de pêche [moyenne entre B et C]......"	20.3
+"Profondeur médiane de pêche [mediane entre B et C]......"	20.4
+"Profondeur moyenne de déploiement [moyenne entre A et D]"	20.4
+"Profondeur médiane de déploiement [mediane entre A et D]"	20.4
+
+
+
+Espèce(s) capturée(s) : 

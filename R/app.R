@@ -2,10 +2,11 @@
 
 library(shiny)
 library(shinythemes)
-library(plotly)
-library(dplyr)
 library(shinyalert)
 library(shinydashboard)
+library(shinyjs)
+library(plotly)
+library(dplyr)
 library(stringr)
 library(htmlwidgets)
 library(webshot)
@@ -23,29 +24,20 @@ shinyApp(ui = ui, server = server)
 
 ## 3. Reste à faire ----
 
-# .txt de sortie
-# Ajouter le modele, le numéro de série
-
-# Apparence .txt sortie
-# Aligner les colonnes (avec des ... : dans une table qu'on a dupliqué juste avant de save)
-# Idem pour les colnames
-# Arrondir les métriques à 1 décimale
-
-# Cacher les boutons de téléchargement si pas de fichier d'entrée
-
-# Condition à la lecture du fichier :
-# Si le champ Depth existe ok
-# S'il n'existe pas on le crée : Pression * 10, arrondir à 1 chiffre après la virgule
+# Bonnes pratiques : où mettre les librairies ? Suppr app.R
 
 # Download : me demander le chemin du dossier ou enregistrer
+
+# Axe des abscisses sur la figure : Date Heure et pas seulement Heure
 
 # Mettre les logos : IRD et Ob7
 # Mettre les mentions de copyright IRD Ob7
 
-# Axe des abscisses sur la figure : Date Heure et pas seulement Heure
 
 # Big test de toutes les manips possibles pour détecter les bugs
 
 # Récuperer le modele du TDR dans les metadata du fichier
 
-# Vérifier : si je change le fichier d'entrée est-ce que ça clean bien les tables / adapte bien la figure ?
+# A et D : pas besoin de les placer à la main, ça peut être min(timeStamp) et max(timeStamp)
+
+# Rendre l'app autonome, standalone
