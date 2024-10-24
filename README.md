@@ -5,11 +5,9 @@ https://ird-ob7.shinyapps.io/tdr-profile-analyzer/
 
 # Next updates
 
-## Urgent
+Rendre cette appli jolie !
 
-Mettre les logos : IRD et Ob7, mettre les mentions de copyright IRD Ob7
-
-## Ensuite
+Mettre les mentions de copyright IRD Ob7
 
 Big test de toutes les manips possibles pour détecter les bugs
 

@@ -341,7 +341,7 @@ server <- function(input, output, session) {
       }
       
       # # On définit le chemin ou on veut enregistrer le document final
-      # save_path <- file.path("..", "output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
+      # save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.txt"))
       
       # Ouvrir le fichier pour écrire
       # con <- file(save_path, open = "wt")
@@ -412,7 +412,7 @@ server <- function(input, output, session) {
     
     content = function(file) {
       # # On définit le chemin ou on veut enregistrer le graphique final
-      # save_path <- file.path("..", "output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
+      # save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
       
       # On sauvegarde en passant par un fichier HTML temporaire
       temp_html <- tempfile(fileext = ".html")

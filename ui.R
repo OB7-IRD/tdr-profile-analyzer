@@ -16,10 +16,19 @@ library(webshot)
 
 ui <- dashboardPage(
   dashboardHeader(title = "TDR PROFILE ANALYZER - v0.1",
-                  titleWidth = 500),
+                  titleWidth = 500,
+                  disable = TRUE),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
     useShinyjs(),
+    fluidRow(
+      column(8,
+             h1("TDR PROFILE ANALYZER - v0.1", style = "padding-left: 20px;font-family: Helvetica, Arial, sans-serif;")),
+      column(width = 4,
+             tags$img(src = "logo_ird_2.png", height = "70px", style = "float: right; padding-right: 20px;"),
+             tags$img(src = "logo_ob7_2.png", height = "80px", style = "float: right; padding-right: 30px;")),
+      column(width = 12, br())
+    ),
     fluidRow(
       box(
         title = "1. Sélection du fichier .csv (NKE WiSens TD1000 v2)", 
