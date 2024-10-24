@@ -1,3 +1,19 @@
+# Packages ----
+
+library(shiny)
+library(shinythemes)
+library(shinyalert)
+library(shinydashboard)
+library(shinyjs)
+library(plotly)
+library(dplyr)
+library(stringr)
+library(htmlwidgets)
+library(webshot)
+
+
+# server ----
+
 server <- function(input, output, session) {
   
   ## Les parties d'UI cachées ----

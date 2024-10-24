@@ -1,3 +1,19 @@
+# Packages ----
+
+library(shiny)
+library(shinythemes)
+library(shinyalert)
+library(shinydashboard)
+library(shinyjs)
+library(plotly)
+library(dplyr)
+library(stringr)
+library(htmlwidgets)
+library(webshot)
+
+
+# ui ----
+
 ui <- dashboardPage(
   dashboardHeader(title = "TDR PROFILE ANALYZER - v0.1",
                   titleWidth = 500),
