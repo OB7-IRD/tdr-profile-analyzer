@@ -1,0 +1,104 @@
+/* Le style CSS de MelliScope */
+
+/* Les "boites" du corps de la page - Le titre */
+.box.box-solid.box-primary>.box-header {
+    color: #FFFFFF;
+    background: #26355b;
+    background-color: #26355b;
+}
+
+/* Les "boites" du corps de la page - Les bordures */
+.box.box-solid.box-primary {
+    border: 1px solid #26355b;
+}
+
+/* Les "boites" dans des boites du corps de la page - Les bordures du haut */
+.box.box-primary {
+    border-top-color: #26355b;
+}
+
+/* Les "boites" dans des boites du corps de la page - Les bordures */
+.box.box-solid.box-success {
+    border: 1px solid #000000;
+}
+
+/* Les boutons de style stretch */
+.bttn-stretch.bttn-primary {
+    color: #000000;
+}
+
+/* Les boutons de style jelly */
+.bttn-jelly.bttn-primary {
+    background: #26355b;
+    color: #000;
+	margin: 1px 10px;
+}
+
+/* Les boutons de style fill */
+.bttn-fill.bttn-primary {
+    background: #26355b;
+    color: #000;
+	margin: 1px 10px;
+}
+.bttn-fill.bttn-primary:hover {
+    background: #fff;
+    color: #000;
+	margin: 1px 10px;
+}
+
+/* Les boutons de style material-circle */
+.bttn-material-circle {
+	margin: 2px 5px;
+}
+
+/* Les cases à cocher, que ce soit choix multiple (ex : les races d'abeille) ou non (ex : pratique ou non de la transhumance) */
+.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] {
+    position: absolute;
+    margin-top: 4px\9;
+    margin-left: -20px;
+    accent-color: #26355b;
+}
+
+/* Les sendSweetAlert : cas particulier */
+/* Pour le bouton "Ok" de ces pop-up (qui interviennent de nombreuses fois, par exemple pour annoncer la météo ou pour signaler une erreur), la modification de la couleur est faite directement dans le script server.R :
+sendSweetAlert(session, title = "...", text = "...", type = "...", btn_colors = "#26355b") */
+
+/* La jauge qui indique combien des 200 ruches ont été placées */
+.progress-bar-light-blue, .progress-bar-primary {
+    background-color: #26355b;
+}
+
+/* La jauge qui indique où on en est de l'affichage de la carte */
+.progress-bar {
+	background-color: #26355b;
+}
+
+/* Le titre */
+.skin-black .main-header>.logo {
+    background-color: #fff;
+    color: #000;
+	font-size:1.8em;
+	text-align: left;
+	font-weight: bold;
+    border-bottom: 0 solid transparent;
+    border-right: none;
+    height: 80px;
+	padding-left:70px;
+}
+/* Quelques éléments de CSS sont directement dans le code : le fait de centrer verticalement le texte, et la police */
+
+/* Le logo en haut à droite */
+.nav>li>a {
+    position: relative;
+    display: block;
+    padding: 0px 0px;
+	width: 350px;
+}
+
+/* Le texte à côté du logo en haut à droite */
+.skin-black .main-header .navbar .nav>li>a {
+    color: #000;
+}
+.skin-black .main-header .navbar .nav>li>a:hover {
+    color: #000;
+}

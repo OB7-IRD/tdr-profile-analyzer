@@ -10,6 +10,9 @@ library(dplyr)
 library(stringr)
 library(htmlwidgets)
 library(webshot)
+if (!webshot::is_phantomjs_installed()) {
+  webshot::install_phantomjs()
+}
 
 
 # server ----

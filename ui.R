@@ -10,6 +10,9 @@ library(dplyr)
 library(stringr)
 library(htmlwidgets)
 library(webshot)
+# if (!webshot::is_phantomjs_installed()) {
+#   webshot::install_phantomjs()
+# }
 
 
 # ui ----
@@ -20,14 +23,19 @@ ui <- dashboardPage(
                   disable = TRUE),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
+    tags$head(
+      # On mets ici le lien avec le fichier CSS, qui determine le style de l'application
+      # Mais ce fichier s'appliquera à l'ensemble de l'app, pas uniquement au dashboardBody
+      tags$link(rel = "stylesheet", type = "text/css", href = "script_style.css")
+    ),
+    
     useShinyjs(),
     fluidRow(
       column(8,
-             h1("TDR PROFILE ANALYZER - v0.1", style = "padding-left: 20px;font-family: Helvetica, Arial, sans-serif;")),
+             h1("TDR PROFILE ANALYZER", style = "padding-left: 20px;font-family: Helvetica, Arial, sans-serif; margin-top: 5px; margin-bottom: 5px; color:#26355b;"),
+             h3("version 1.0", style = "padding-left: 60px;font-family: Helvetica, Arial, sans-serif; margin-top: 5px; margin-bottom: 15px; color:#26355b;")),
       column(width = 4,
-             tags$img(src = "logo_ird_2.png", height = "70px", style = "float: right; padding-right: 20px;"),
-             tags$img(src = "logo_ob7_2.png", height = "80px", style = "float: right; padding-right: 30px;")),
-      column(width = 12, br())
+             tags$img(src = "logo_ob7_ird.png", height = "70px", style = "float: right; padding-right: 30px;")),
     ),
     fluidRow(
       box(
