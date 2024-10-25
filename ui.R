@@ -96,14 +96,6 @@ ui <- dashboardPage(
         width = 12,
         status = "primary", solidHeader = TRUE,
         
-        # h5("S'il y a eu une capture, entrez le code FAO de l'espèce :"),
-        # textInput("capture_FAO",
-        #           label = NULL,
-        #           value = "",
-        #           width = '100px'),
-        # downloadButton("download_plot", "Télécharger figure en .png"),
-        # downloadButton("download_data", "Télécharger données en .txt")
-        
         fluidRow(
           column(
             width = 4,
