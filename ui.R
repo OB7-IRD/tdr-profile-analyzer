@@ -40,13 +40,14 @@ ui <- dashboardPage(
     ),
     fluidRow(
       box(
-        title = "1. Sélection du fichier .csv (NKE WiSens TD1000 v2)", 
+        title = "1. Chargement du fichier .csv", 
         width = 12,
         status = "primary", solidHeader = TRUE,
         
         column(12,
                # Input : le fichier .csv d'entrée
                column(8,
+                      h5("Sélectionnez un fichier .csv original provenant d'un NKE WiSens TD1000 v2 (avec ou sans profondeur) :"),
                       fileInput("file1", label = NULL,
                                 buttonLabel = "Parcourir",
                                 placeholder = "Pas de fichier sélectionné",
@@ -57,6 +58,7 @@ ui <- dashboardPage(
                
                # Numéro de série, dates de marée
                column(4,
+                      h5("Metadata :"),
                       textOutput("tdrmodel"),
                       textOutput("numerodeserie"))),
         
@@ -72,7 +74,7 @@ ui <- dashboardPage(
         status = "primary", solidHeader = TRUE,
         
         column(6,
-               h5("Sur le profile suivant, cliquez pour placer dans l'ordre :"),
+               h5("Sur le profil suivant, cliquez pour placer dans l'ordre :"),
                h5("- (A) Le début du déploiement."),
                h5("- (B) Le début de pêche."),
                h5("- (C) La fin de pêche (début de la remontée ou capture d'un individu)."),
