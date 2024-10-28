@@ -38,7 +38,12 @@ server <- function(input, output, session) {
         
         column(6,
                h4("Horodatage :"),
-               tableOutput("selected_points")),
+               tableOutput("selected_points"),
+               hr(),
+               h4("Capture :"),
+               h5("S'il y a eu une capture, entrez le code FAO de l'espèce :"),
+               textInput("capture_FAO", label = NULL, value = "", width = '100px')
+        ),
         
         column(6,
                h4("Données clés :"),
@@ -463,57 +468,6 @@ server <- function(input, output, session) {
       ggsave(file, plot = p, width = 12, height = 6, dpi = 300)
     }
   )
-  
-  # # Téléchargement de la figure au format .png
-  # output$download_plot <- downloadHandler(
-  #   filename = function() {
-  #     paste0(gsub(".csv", "", input$file1$name),
-  #            "_tdr-profile-analyzer.png")
-  #   },
-  #   
-  #   content = function(file) {
-  #     # # On définit le chemin ou on veut enregistrer le graphique final
-  #     # save_path <- file.path("output", paste0(gsub(".csv", "", input$file1$name), "_tdr-profile-analyzer.png"))
-  #     
-  #     # On sauvegarde en passant par un fichier HTML temporaire
-  #     temp_html <- tempfile(fileext = ".html")
-  #     
-  #     # Générer le graphique
-  #     req(input$file1)
-  #     df1 <- stage1(input)
-  #     df2 <- stage2(df1)
-  #     p <- plot_ly(data = df2, x = ~TimeStamp, y = ~Depth * -1,
-  #                  type = 'scatter', mode = 'lines') %>%
-  #       layout(
-  #         title = list(text = gsub(".csv", "", input$file1$name)),
-  #         xaxis = list(title = "Jour et heure", tickformat = "%y-%m-%d %H:%M"),
-  #         yaxis = list(title = "Profondeur (m)", range = c(max(df2$Depth, na.rm = TRUE) * -1, 0)),
-  #         showlegend = FALSE
-  #       )
-  #     current_points <- selected_points()
-  #     if (nrow(current_points) > 0) {
-  #       p <- p %>%
-  #         add_trace(data = current_points, x = ~TimeStamp, y = ~Depth,
-  #                   type = 'scatter', mode = 'markers+text',
-  #                   text = ~Etape, textposition = 'top right',
-  #                   textfont = list(color = 'red'),
-  #                   marker = list(color = 'red', size = 10), showlegend = FALSE)
-  #     }
-  #     click_data <- event_data("plotly_click")
-  #     if (nrow(current_points) > 0 & !is.null(click_data)) {
-  #       p <- p %>%
-  #         add_segments(x = current_points$TimeStamp, xend = current_points$TimeStamp,
-  #                      y = max(df2$Depth, na.rm = TRUE) * -1, yend = 0,
-  #                      line = list(color = 'red', width = 2), showlegend = FALSE)
-  #     }
-  #     
-  #     # Sauvegarder le graphique dans un fichier HTML temporaire
-  #     htmlwidgets::saveWidget(p, temp_html, selfcontained = TRUE)
-  #     # Utiliser webshot pour créer une image PNG à partir du fichier HTML
-  #     # webshot::webshot(temp_html, file = save_path, vwidth = 1200, vheight = 600)
-  #     webshot::webshot(temp_html, file, vwidth = 1200, vheight = 600)
-  #   }
-  # )
   
   # Bouton pour calculer les données clés
   observeEvent(input$calculate, {

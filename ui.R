@@ -99,21 +99,14 @@ ui <- dashboardPage(
         
         fluidRow(
           column(
-            width = 4,
-            align = "center",
-            h5("S'il y a eu une capture, entrez le code FAO de l'espèce :"),
-            textInput("capture_FAO", label = NULL, value = "", width = '100px')
-          ),
-          
-          column(
-            width = 4,
+            width = 6,
             align = "center",
             br(),
             downloadButton("download_plot", "Télécharger figure en .png")
           ),
           
           column(
-            width = 4,
+            width = 6,
             align = "center",
             br(),
             downloadButton("download_data", "Télécharger données en .txt")
