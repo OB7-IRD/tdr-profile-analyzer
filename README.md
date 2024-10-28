@@ -6,7 +6,6 @@ https://ird-ob7.shinyapps.io/tdr-profile-analyzer/
 
 ## Next updates
 
-- Souci download plot
 - Récuperer le modele du TDR dans les metadata du fichier
 - Mettre les mentions de copyright IRD Ob7
 - Big test de toutes les manips possibles pour détecter les bugs

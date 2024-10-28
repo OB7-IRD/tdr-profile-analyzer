@@ -13,6 +13,7 @@ library(webshot)
 # if (!webshot::is_phantomjs_installed()) {
 #   webshot::install_phantomjs()
 # }
+# library(ggplot2)
 
 
 # ui ----
