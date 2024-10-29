@@ -19,8 +19,7 @@ library(webshot)
 # ui ----
 
 ui <- dashboardPage(
-  dashboardHeader(title = "TDR PROFILE ANALYZER - v0.1",
-                  titleWidth = 500,
+  dashboardHeader(title = "TDR PROFILE ANALYZER",
                   disable = TRUE),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
